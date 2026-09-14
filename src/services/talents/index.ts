@@ -3,10 +3,15 @@ import {CalculateEngine} from './CalculateEngine';
 import {DatetimeEngine} from './DatetimeEngine';
 import {WebSearchEngine} from './WebSearchEngine';
 import {ReadUrlEngine} from './ReadUrlEngine';
+import {RememberEngine} from './RememberEngine';
+import {OpenUrlEngine} from './OpenUrlEngine';
+import {CopyToClipboardEngine} from './CopyToClipboardEngine';
 import {talentRegistry} from './TalentRegistry';
 import type {SearchAccess} from './searchAccess';
+import type {MemoryAccess} from './RememberEngine';
 import type {ToolDefinition, SystemPromptContext} from './types';
 import {searchProviderStore} from '../../store/SearchProviderStore';
+import {memoryStore} from '../../store/MemoryStore';
 import {createSearchProvider, readWithDefaultReader} from '../search';
 
 export {TalentRegistry, talentRegistry} from './TalentRegistry';
@@ -17,7 +22,11 @@ export {CalculateEngine} from './CalculateEngine';
 export {DatetimeEngine} from './DatetimeEngine';
 export {WebSearchEngine} from './WebSearchEngine';
 export {ReadUrlEngine} from './ReadUrlEngine';
+export {RememberEngine} from './RememberEngine';
+export {OpenUrlEngine} from './OpenUrlEngine';
+export {CopyToClipboardEngine} from './CopyToClipboardEngine';
 export type {SearchAccess} from './searchAccess';
+export type {MemoryAccess} from './RememberEngine';
 // Deliberately narrow: the raw allowlist writers stay module-internal so all
 // writes happen inside services/talents (seed at run start, WebSearchEngine
 // per search).
@@ -45,6 +54,14 @@ function createSearchAccess(): SearchAccess {
   };
 }
 
+function createMemoryAccess(): MemoryAccess {
+  return {
+    remember: (text: string) => {
+      memoryStore.remember(text);
+    },
+  };
+}
+
 let registered = false;
 
 /**
@@ -62,6 +79,9 @@ export function registerDefaultTalents(): void {
   const searchAccess = createSearchAccess();
   talentRegistry.register(new WebSearchEngine(searchAccess));
   talentRegistry.register(new ReadUrlEngine(searchAccess));
+  talentRegistry.register(new RememberEngine(createMemoryAccess()));
+  talentRegistry.register(new OpenUrlEngine());
+  talentRegistry.register(new CopyToClipboardEngine());
   registered = true;
 }
 

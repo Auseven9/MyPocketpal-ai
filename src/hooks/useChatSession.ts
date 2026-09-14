@@ -9,6 +9,7 @@ import {randId} from '../utils';
 import {L10nContext} from '../utils';
 import {
   chatSessionStore,
+  memoryStore,
   modelStore,
   palStore,
   ttsStore,
@@ -139,10 +140,22 @@ const prepareCompletion = async ({
     maxToolTurns: DEFAULT_MAX_TURNS,
   });
 
-  const messages = assembleMessages(systemMessages, systemPromptFragments, [
-    ...chatMessages,
-    {role: 'user', content: userMessageContent},
-  ]);
+  // Persistent memory is read unconditionally — independent of which
+  // talents this Pal has enabled, since recalling what's already known
+  // about the user isn't a tool call (only writing a new fact, via the
+  // `remember` talent, is gated like any other tool).
+  const memoryFragments = [
+    memoryStore.factsSystemPromptFragment,
+    memoryStore.recentContextSystemPromptFragment(
+      chatSessionStore.activeSessionId,
+    ),
+  ].filter((fragment): fragment is string => !!fragment);
+
+  const messages = assembleMessages(
+    systemMessages,
+    [...systemPromptFragments, ...memoryFragments],
+    [...chatMessages, {role: 'user', content: userMessageContent}],
+  );
 
   // Reseed the read_url exfiltration allowlist for this run; the trust policy
   // (which sources count) lives in the talents module.
@@ -438,6 +451,14 @@ async function applyEventToStore(
         );
       } catch (ttsErr) {
         console.warn('[useChatSession] TTS complete hook failed:', ttsErr);
+      }
+      // Deterministic carry-forward for cross-session continuity: no extra
+      // completion call (only one llama.cpp context can run at a time), so
+      // this is a plain excerpt of the final turn rather than an
+      // LLM-generated summary. Read back by the next session that isn't
+      // this one, via recentContextSystemPromptFragment().
+      if (finalResult.text?.trim()) {
+        memoryStore.captureRecentContext(ctx.sessionId, finalResult.text);
       }
       return;
     }

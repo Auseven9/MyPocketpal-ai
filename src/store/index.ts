@@ -9,3 +9,4 @@ export * from './DeepLinkStore';
 export * from './TTSStore';
 export * from './CheckoutFlowStore';
 export * from './SearchProviderStore';
+export * from './MemoryStore';
