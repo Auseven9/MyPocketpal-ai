@@ -74,6 +74,7 @@ import {
   ChatInputTopLevelProps,
   Menu,
   PendingIndicator,
+  InferenceSpectrum,
   ChatPalModelPickerSheet,
   ChatHeader,
   ChatEmptyPlaceholder,
@@ -828,6 +829,12 @@ export const ChatView = observer(
       // had been `streaming_text` (no indicator) at the moment of the
       // tap. Cleared together with `isStopping` once the runner exits.
       chatSessionStore.isStopping;
+    // The one dead zone PendingIndicator deliberately leaves uncovered: real
+    // tokens are landing, but nothing on screen shows the model is actively
+    // working versus just having printed a short reply and stopped. Mutually
+    // exclusive with isPending (isStopping already wins there).
+    const isStreamingActively =
+      agentStatus === 'streaming_text' && !chatSessionStore.isStopping;
     const activeRunPendingTalentNames =
       chatSessionStore.agentUiState.pendingTalentNames;
     const isGeneratingToolCall = agentStatus === 'generating_tool_call';
@@ -971,10 +978,11 @@ export const ChatView = observer(
       () => (
         <>
           {isPending && <PendingIndicatorView />}
+          {isStreamingActively && <InferenceSpectrum />}
           {chatMessages.length > 0 && <Reanimated.View style={headerStyle} />}
         </>
       ),
-      [isPending, chatMessages.length, headerStyle],
+      [isPending, isStreamingActively, chatMessages.length, headerStyle],
     );
 
     // Render complete chat list with scroll-to-bottom button
