@@ -525,6 +525,39 @@ export class TTSStore {
     );
   }
 
+  /**
+   * Fire-and-forget: load the current voice's native engine now, ahead of
+   * the reply that will need it. Neural engines can take seconds to cold
+   * start (Kokoro's warm-up is ~4s) — calling this only inside
+   * `onAssistantMessageStart` means that cost lands entirely AFTER the
+   * model's first token, in addition to prefill+generation time. Called as
+   * early as a turn starts (the user hitting send), so the warm-up overlaps
+   * with LLM prefill/generation instead of stacking after it. A no-op
+   * engine-acquire: it loads the native model into memory without playing
+   * anything, so the real `playStreaming()` call moments later finds the
+   * engine already active and starts synthesis immediately.
+   *
+   * Safe to call unconditionally — no-ops via the same gates
+   * `onAssistantMessageStart` uses, and any error is swallowed (a failed
+   * warm-up just means the normal lazy-load path in `playStreaming` pays
+   * the cost later, same as today).
+   */
+  warmUp(): void {
+    if (
+      !this.isTTSAvailable ||
+      !this.autoSpeakEnabled ||
+      this.currentVoice == null
+    ) {
+      return;
+    }
+    const engine = getEngine(this.currentVoice.engine);
+    ttsRuntime
+      .acquire(engine, async () => {})
+      .catch(err => {
+        console.warn('[TTSStore] warmUp failed:', err);
+      });
+  }
+
   /** First token / message creation. Opens a streaming session. */
   onAssistantMessageStart(messageId: string): void {
     if (

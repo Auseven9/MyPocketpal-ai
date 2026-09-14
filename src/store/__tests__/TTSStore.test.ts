@@ -23,6 +23,10 @@ jest
 // real SystemEngine (which imports @pocketpalai/react-native-speech).
 const mockSystemPlay = jest.fn().mockResolvedValue(undefined);
 const mockSystemStop = jest.fn().mockResolvedValue(undefined);
+const mockSystemLoadInto = jest.fn().mockResolvedValue(undefined);
+const mockSupertonicLoadInto = jest.fn().mockResolvedValue(undefined);
+const mockKokoroLoadInto = jest.fn().mockResolvedValue(undefined);
+const mockKittenLoadInto = jest.fn().mockResolvedValue(undefined);
 const mockSupertonicPlay = jest
   .fn()
   .mockRejectedValue(new Error('Supertonic model is not installed'));
@@ -89,6 +93,7 @@ jest.mock('../../services/tts', () => {
           id: 'system',
           isInstalled: jest.fn().mockResolvedValue(true),
           getVoices: jest.fn().mockResolvedValue([]),
+          loadInto: mockSystemLoadInto,
           play: mockSystemPlay,
           playStreaming: mockSystemPlayStreaming,
           stop: mockSystemStop,
@@ -99,6 +104,7 @@ jest.mock('../../services/tts', () => {
           id: 'kokoro',
           isInstalled: mockKokoroIsInstalled,
           getVoices: mockKokoroGetVoices,
+          loadInto: mockKokoroLoadInto,
           play: mockKokoroPlay,
           playStreaming: jest.fn(() => ({
             appendText: jest.fn(),
@@ -116,6 +122,7 @@ jest.mock('../../services/tts', () => {
           id: 'kitten',
           isInstalled: mockKittenIsInstalled,
           getVoices: jest.fn().mockResolvedValue([]),
+          loadInto: mockKittenLoadInto,
           play: mockKittenPlay,
           playStreaming: jest.fn(() => ({
             appendText: jest.fn(),
@@ -131,6 +138,7 @@ jest.mock('../../services/tts', () => {
         id: 'supertonic',
         isInstalled: mockSupertonicIsInstalled,
         getVoices: mockSupertonicGetVoices,
+        loadInto: mockSupertonicLoadInto,
         play: mockSupertonicPlay,
         playStreaming: mockSupertonicPlayStreaming,
         stop: mockSupertonicStop,
@@ -169,6 +177,7 @@ const flush = () => new Promise(r => setImmediate(r));
 describe('TTSStore', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    ttsRuntime._resetForTests();
     appStateHandlers.length = 0;
     lastSystemHandle = null;
     lastSupertonicHandle = null;
@@ -482,6 +491,80 @@ describe('TTSStore', () => {
 
       expect(store.playbackState.mode).toBe('idle');
       expect(mockSystemStop).toHaveBeenCalled();
+    });
+  });
+
+  describe('warmUp()', () => {
+    const setupEligible = async () => {
+      const store = await makeStore();
+      store.setCurrentVoice(SYSTEM_VOICE);
+      store.setAutoSpeak(true);
+      return store;
+    };
+
+    it('loads the current voice engine ahead of playback, without playing anything', async () => {
+      const store = await setupEligible();
+
+      store.warmUp();
+      await flush();
+
+      expect(ttsRuntime.getActiveEngineId()).toBe('system');
+      expect(mockSystemPlayStreaming).not.toHaveBeenCalled();
+      expect(mockSystemPlay).not.toHaveBeenCalled();
+    });
+
+    it('makes the following onAssistantMessageStart a no-op reload (engine already active)', async () => {
+      const store = await setupEligible();
+      store.warmUp();
+      await flush();
+      expect(mockSystemLoadInto).toHaveBeenCalledTimes(1);
+
+      store.onAssistantMessageStart('msg-1');
+      await flush();
+
+      // Same engine was already active — acquire() must not reload it.
+      expect(mockSystemLoadInto).toHaveBeenCalledTimes(1);
+      expect(mockSystemPlayStreaming).toHaveBeenCalled();
+    });
+
+    it('no-ops when autoSpeakEnabled=false', async () => {
+      const store = await setupEligible();
+      store.setAutoSpeak(false);
+
+      store.warmUp();
+      await flush();
+
+      expect(ttsRuntime.getActiveEngineId()).toBeNull();
+    });
+
+    it('no-ops when currentVoice is null', async () => {
+      const store = await setupEligible();
+      store.setCurrentVoice(null);
+
+      store.warmUp();
+      await flush();
+
+      expect(ttsRuntime.getActiveEngineId()).toBeNull();
+    });
+
+    it('no-ops when isTTSAvailable=false', async () => {
+      (DeviceInfo.getTotalMemory as jest.Mock).mockResolvedValueOnce(3 * GIB);
+      const store = new TTSStore();
+      await store.init();
+      store.setCurrentVoice(SYSTEM_VOICE);
+
+      store.warmUp();
+      await flush();
+
+      expect(ttsRuntime.getActiveEngineId()).toBeNull();
+    });
+
+    it('swallows a loadInto failure rather than throwing', async () => {
+      const store = await setupEligible();
+      mockSystemLoadInto.mockRejectedValueOnce(new Error('native init failed'));
+
+      expect(() => store.warmUp()).not.toThrow();
+      await flush();
     });
   });
 

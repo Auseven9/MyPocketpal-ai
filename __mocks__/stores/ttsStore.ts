@@ -51,6 +51,7 @@ class MockTTSStore {
   setSupertonicLanguage: jest.Mock;
   openSetupSheet: jest.Mock;
   closeSetupSheet: jest.Mock;
+  warmUp: jest.Mock;
   onAssistantMessageStart: jest.Mock;
   onAssistantMessageChunk: jest.Mock;
   onAssistantMessageComplete: jest.Mock;
@@ -78,6 +79,7 @@ class MockTTSStore {
       setSupertonicLanguage: false,
       openSetupSheet: false,
       closeSetupSheet: false,
+      warmUp: false,
       onAssistantMessageStart: false,
       onAssistantMessageChunk: false,
       onAssistantMessageComplete: false,
@@ -103,6 +105,7 @@ class MockTTSStore {
     this.setSupertonicLanguage = jest.fn();
     this.openSetupSheet = jest.fn();
     this.closeSetupSheet = jest.fn();
+    this.warmUp = jest.fn();
     this.onAssistantMessageStart = jest.fn();
     this.onAssistantMessageChunk = jest.fn();
     this.onAssistantMessageComplete = jest.fn();

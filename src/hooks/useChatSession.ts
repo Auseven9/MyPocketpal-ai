@@ -526,6 +526,10 @@ export const useChatSession = (
     modelStore.setInferencing(true);
     modelStore.setIsStreaming(false);
     chatSessionStore.setIsGenerating(true);
+    // Fire-and-forget: get the neural TTS engine loading now so its cold
+    // start overlaps with LLM prefill/generation instead of adding on top
+    // of it once the first token actually lands.
+    ttsStore.warmUp();
 
     try {
       activateKeepAwake();
