@@ -36,7 +36,11 @@ import {
   inferRepoFromModelId,
   parseSizeLabel,
 } from '../utils';
-import {getRecommendedProjectionModel} from '../utils/multimodalHelpers';
+import {
+  getRecommendedProjectionModel,
+  computeLocalVisionPairings,
+  isProjectionModel,
+} from '../utils/multimodalHelpers';
 import {isDraftOnlyModel} from '../utils/mtp';
 import {getOriginalModelName} from '../utils/formatters';
 import type {OnboardingPalModelEntry} from './onboarding/onboardingPals';
@@ -2720,6 +2724,10 @@ class ModelStore {
     }
 
     const defaultSettings = getLocalModelDefaultSettings();
+    // A local file matching the mmproj naming convention is a vision
+    // projector, not a standalone chat model — same detection the HF path
+    // uses on repo siblings, applied here to a bare imported filename.
+    const isProjection = isProjectionModel(filename);
 
     const model: Model = {
       id: uuidv4(), // Generate a unique ID
@@ -2735,6 +2743,7 @@ class ModelStore {
       fullPath: localFilePath,
       isLocal: true, // Kept for backward compatibility
       origin: ModelOrigin.LOCAL,
+      modelType: isProjection ? ModelType.PROJECTION : undefined,
       defaultChatTemplate: {...defaultSettings.chatTemplate},
       chatTemplate: {...defaultSettings.chatTemplate},
       defaultStopWords: [...(defaultSettings?.completionParams?.stop || [])],
@@ -2748,13 +2757,54 @@ class ModelStore {
       this.refreshDownloadStatuses();
     });
 
+    // Re-pair every LOCAL-origin model against every LOCAL projector now that
+    // the list has changed, whichever side of the pair this import was.
+    this.syncLocalMultimodalPairings();
+
     // Get the MobX observable version — the plain `model` object was wrapped
     // in a proxy when pushed into the observable array. We must pass the proxy
     // so that mutations inside fetchAndPersistGGUFMetadata trigger reactivity.
     const observableModel = this.models.find(m => m.id === model.id);
-    if (observableModel) {
+    // Projection models (CLIP) have a different metadata structure — skip,
+    // matching the HF/PRESET download-completion path.
+    if (observableModel && !isProjection) {
       await this.fetchAndPersistGGUFMetadata(observableModel);
     }
+  };
+
+  /**
+   * Re-derive supportsMultimodal / compatibleProjectionModels /
+   * defaultProjectionModel for every LOCAL-origin chat model from the set of
+   * LOCAL-origin projector files currently imported. Local imports have no
+   * "repo siblings" list to pair against (unlike HF), so this re-scans the
+   * whole LOCAL set by filename convention on every import. Best-effort
+   * only — see computeLocalVisionPairings.
+   *
+   * Called only from addLocalModel: deletion already has its own tested
+   * cleanup path (canDeleteProjectionModel / setModelVisionEnabled), which
+   * this must not clobber by re-deriving fields it doesn't own.
+   */
+  syncLocalMultimodalPairings = () => {
+    const localModels = this.models.filter(m => m.origin === ModelOrigin.LOCAL);
+    const pairings = computeLocalVisionPairings(localModels);
+    runInAction(() => {
+      for (const model of localModels) {
+        const pairing = pairings.get(model.id);
+        if (!pairing) {
+          continue;
+        }
+        model.supportsMultimodal = pairing.supportsMultimodal;
+        model.compatibleProjectionModels = pairing.compatibleProjectionModels;
+        model.defaultProjectionModel = pairing.defaultProjectionModel;
+        if (!pairing.supportsMultimodal) {
+          model.visionEnabled = undefined;
+        } else if (model.visionEnabled === undefined) {
+          // Parity with the HF path's default: vision on by default once a
+          // projector is available, the user can still toggle it off.
+          model.visionEnabled = true;
+        }
+      }
+    });
   };
 
   updateModelChatTemplate = (

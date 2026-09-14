@@ -163,3 +163,55 @@ export function getVisionModelSizeBreakdown(
     hasProjection,
   };
 }
+
+/** Minimal shape `computeLocalVisionPairings` needs from a LOCAL-origin Model. */
+export interface LocalPairingCandidate {
+  id: string;
+  filename: string;
+  modelType?: string;
+}
+
+export interface LocalVisionPairing {
+  supportsMultimodal: boolean;
+  compatibleProjectionModels?: string[];
+  defaultProjectionModel?: string;
+}
+
+/**
+ * Pair up locally-imported files the same way an HF repo's siblings are
+ * paired: any local file whose name matches the mmproj pattern is a
+ * projector candidate for every other local (non-projection) file. Unlike
+ * the HF path there is no repo boundary to scope the match to — a local
+ * import has no siblings list — so this is best-effort by filename/quant
+ * heuristics only (via getRecommendedProjectionModel), not a verified
+ * architecture match. Callers should let the user override the pick via
+ * the existing ProjectionModelSelector.
+ */
+export function computeLocalVisionPairings(
+  localModels: LocalPairingCandidate[],
+): Map<string, LocalVisionPairing> {
+  const projections = localModels.filter(m => isProjectionModel(m.filename));
+  const llms = localModels.filter(m => !isProjectionModel(m.filename));
+  const projFilenames = projections.map(p => p.filename);
+
+  const result = new Map<string, LocalVisionPairing>();
+  for (const llm of llms) {
+    if (projections.length === 0) {
+      result.set(llm.id, {supportsMultimodal: false});
+      continue;
+    }
+    const recommendedFilename = getRecommendedProjectionModel(
+      llm.filename,
+      projFilenames,
+    );
+    const defaultProjection = projections.find(
+      p => p.filename === recommendedFilename,
+    );
+    result.set(llm.id, {
+      supportsMultimodal: true,
+      compatibleProjectionModels: projections.map(p => p.id),
+      defaultProjectionModel: defaultProjection?.id,
+    });
+  }
+  return result;
+}

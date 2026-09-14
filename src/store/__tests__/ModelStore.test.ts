@@ -1198,6 +1198,49 @@ describe('ModelStore', () => {
       expect(modelStore.activeModelId).toBeUndefined();
       expect(modelStore.context).toBeUndefined();
     });
+
+    describe('local vision model pairing', () => {
+      it('imports a local mmproj file as a projection model, not a chat model', async () => {
+        const {loadLlamaModelInfo: mockLoadInfo} = require('llama.rn');
+        (mockLoadInfo as jest.Mock).mockClear();
+
+        await modelStore.addLocalModel('/path/to/mmproj-llava-f16.gguf');
+
+        const proj = modelStore.models[0];
+        expect(proj.modelType).toBe(ModelType.PROJECTION);
+        // Projection models never get GGUF chat metadata fetched.
+        expect(mockLoadInfo).not.toHaveBeenCalled();
+        // And they're excluded from the display list.
+        expect(modelStore.displayModels).toHaveLength(0);
+      });
+
+      it('recognizes a local vision LLM once a matching local mmproj is imported', async () => {
+        await modelStore.addLocalModel('/path/to/llava-v1.6-mistral-7b.gguf');
+        const llmId = modelStore.models[0].id;
+        expect(modelStore.models[0].supportsMultimodal).toBe(false);
+
+        await modelStore.addLocalModel('/path/to/mmproj-llava-v1.6-f16.gguf');
+        const projId = modelStore.models.find(
+          m => m.modelType === ModelType.PROJECTION,
+        )!.id;
+
+        const llm = modelStore.models.find(m => m.id === llmId)!;
+        expect(llm.supportsMultimodal).toBe(true);
+        expect(llm.compatibleProjectionModels).toEqual([projId]);
+        expect(llm.defaultProjectionModel).toBe(projId);
+        expect(llm.visionEnabled).toBe(true);
+      });
+
+      it('pairs regardless of import order (projector first)', async () => {
+        await modelStore.addLocalModel('/path/to/mmproj-llava-v1.6-f16.gguf');
+        await modelStore.addLocalModel('/path/to/llava-v1.6-mistral-7b.gguf');
+
+        const llm = modelStore.models.find(
+          m => m.modelType !== ModelType.PROJECTION,
+        )!;
+        expect(llm.supportsMultimodal).toBe(true);
+      });
+    });
   });
 
   describe('model name management', () => {
