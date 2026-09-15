@@ -129,7 +129,7 @@
     "importError": "Failed to import chat sessions. Please check the file format.",
     "internetSearch": {
       "title": "Internet Search",
-      "description": "Let Pals search the web with their own tools. Bring your own API key — PocketPal never holds your keys or routes your queries.",
+      "description": "Let Pals search the web with their own tools. Bring your own API key — Alesis never holds your keys or routes your queries.",
       "providerLabel": "Search provider",
       "providerGated": "Coming soon",
       "keyLabel": "API key",
@@ -145,12 +145,26 @@
       "resultCountLabel": "Results per search",
       "resultCountDescription": "Fewer results keep more room in the model's context.",
       "consentTitle": "Searches leave your device",
-      "consentDescription": "When a Pal searches the web, your query is sent to the selected provider over the internet. When a Pal reads a page, the URL and page content may instead be sent to a default reader service (r.jina.ai) if the selected provider has no native reader. Keys and queries are never sent to PocketPal.",
+      "consentDescription": "When a Pal searches the web, your query is sent to the selected provider over the internet. When a Pal reads a page, the URL and page content may instead be sent to a default reader service (r.jina.ai) if the selected provider has no native reader. Keys and queries are never sent to Alesis.",
       "consentAccept": "I understand",
       "consentRequired": "Accept the disclosure above to set a key and enable search.",
       "consentGivenTitle": "Searching the web is enabled",
       "consentGivenDescription": "Queries and page reads may leave your device as described above.",
       "consentRevoke": "Revoke"
+    },
+    "memories": {
+      "title": "Memories",
+      "description": "Facts Pals have saved about you with the remember tool. They're read on every chat, no matter which Pal, until you delete them here.",
+      "countLabel": "{{count}} remembered",
+      "countLabelZero": "Nothing remembered yet",
+      "manageButton": "Manage",
+      "sheetDescription": "Delete a fact so Pals stop seeing it, or clear everything at once.",
+      "emptyState": "Nothing remembered yet. A Pal will add facts here when it uses the remember tool.",
+      "deleteFactTitle": "Forget this?",
+      "deleteFactAccessibilityLabel": "Forget this memory",
+      "clearAllButton": "Clear All",
+      "clearAllTitle": "Clear all memories?",
+      "clearAllMessage": "This deletes every fact a Pal has remembered about you. This can't be undone."
     },
     "apiSettingsTitle": "API Settings",
     "huggingFaceTokenLabel": "Hugging Face Token",
@@ -167,45 +181,7 @@
     "clearCachesConfirmMessage": "This will clear all cached session data ({{fileCount}} files, {{size}}). Shortcuts may be slower on first use after clearing. This won't affect your Pals or chat history.",
     "clearCachesSuccess": "Successfully cleared {{count}} cache file(s).",
     "clearCachesError": "Failed to clear caches. Please try again.",
-    "noCachesToClear": "No caches to clear.",
-    "serverName": "Server Name",
-    "serverUrl": "Server URL",
-    "serverUrlPlaceholder": "e.g., http://192.168.1.100:1234",
-    "requestTimeout": "Request Timeout (seconds)",
-    "requestTimeoutPlaceholder": "Optional - leave empty for default",
-    "requestTimeoutHelp": "Max wait for a slow server to respond. Leave empty for default.",
-    "serverType": "Server Type",
-    "serverTypeHelp": "Auto-detected; change if it's wrong.",
-    "apiKey": "API Key",
-    "apiKeyPlaceholder": "Optional - required for OpenAI/Groq",
-    "apiKeyDescription": "Stored securely on device.",
-    "remoteModel": "Remote",
-    "remotePrivacyNotice": "Messages sent to remote servers leave your device. Only connect to servers you trust.",
-    "remoteIndicator": "Remote",
-    "serverUrlRequired": "Server URL is required",
-    "serverUrlInvalid": "Invalid URL format",
-    "serverUrlHttpWarning": "iOS requires HTTPS for non-local servers. Use https:// or a local network address.",
-    "addRemoteModel": "Add Remote Model",
-    "yourServers": "Your Servers",
-    "orConnectNewServer": "or connect new server",
-    "selectModel": "Select Model",
-    "addModel": "Add Model",
-    "connected": "Connected",
-    "connectionFailed": "Connection failed: {{error}}",
-    "connecting": "Connecting...",
-    "noModelsAvailable": "No models available on this server.",
-    "alreadyAdded": "Already added",
-    "connectedServers": "Connected Servers",
-    "modelsCount": "{{count}} models",
-    "serverDetails": "Server Details",
-    "modelsUsingServer": "Models using this server:",
-    "saveChanges": "Save Changes",
-    "removeServer": "Remove Server",
-    "removeServerMessage": "Remove {{serverName}} and its {{count}} models?",
-    "removeRemoteModel": "Remove {{modelName}} ({{serverName}})?",
-    "retryConnection": "Retry",
-    "enterUrlManually": "Enter URL manually",
-    "manageServers": "Manage Servers"
+    "noCachesToClear": "No caches to clear."
   },
   "memory": {
     "shortWarning": "Memory Warning",
@@ -505,7 +481,7 @@
     "screenTitle": "App Info",
     "description": "An app that brings language models directly to your phone. Sits on the shoulders of llama.cpp and llama.rn.",
     "supportProject": "Support the Project",
-    "supportProjectDescription": "If you enjoy using PocketPal AI, please consider supporting the project by:",
+    "supportProjectDescription": "If you enjoy using Alesis, please consider supporting the project by:",
     "githubButton": "Star on GitHub",
     "orText": "or",
     "orBy": "or by",
@@ -513,17 +489,17 @@
     "versionCopiedTitle": "Version copied",
     "versionCopiedDescription": "Version information has been copied to clipboard",
     "tour": "Tour",
-    "tourDescription": "Replay the welcome screens to see what PocketPal AI offers.",
+    "tourDescription": "Replay the welcome screens to see what Alesis offers.",
     "showIntroButton": "Show intro again",
     "privacyPolicy": "Privacy Policy",
     "termsOfService": "Terms of Service"
   },
   "feedback": {
     "title": "Send Feedback",
-    "description": "Your voice matters! Tell us how PocketPal AI is helping you and what we can do to make it even more useful.",
+    "description": "Your voice matters! Tell us how Alesis is helping you and what we can do to make it even more useful.",
     "shareThoughtsButton": "Sharing your thoughts",
     "useCase": {
-      "label": "What are you using PocketPal AI for?",
+      "label": "What are you using Alesis for?",
       "placeholder": "e.g., summarization, roleplay, etc."
     },
     "featureRequests": {
@@ -535,7 +511,7 @@
       "placeholder": "Share any other thoughts you may have."
     },
     "usageFrequency": {
-      "label": "How often do you use PocketPal AI? (Optional)",
+      "label": "How often do you use Alesis? (Optional)",
       "options": {
         "daily": "Daily",
         "weekly": "Weekly",
@@ -604,7 +580,7 @@
     },
     "chatEmptyPlaceholder": {
       "noModelsTitle": "No Models Available",
-      "noModelsDescription": "Download a model to start chatting with PocketPal",
+      "noModelsDescription": "Download a model to start chatting with Alesis",
       "noModelsButton": "Download Model",
       "activateModelTitle": "Activate Model To Get Started",
       "activateModelDescription": "Select the model and download it. After downloading, tap Load next to the model and start chatting.",
@@ -657,7 +633,7 @@
     },
     "modelErrorReportSheet": {
       "title": "Report Model Loading Issue",
-      "privacyNote": "Help us improve PocketPal by sharing details about this error. Review below what will be shared - you can deselect any items you prefer not to include.",
+      "privacyNote": "Help us improve Alesis by sharing details about this error. Review below what will be shared - you can deselect any items you prefer not to include.",
       "errorMessage": "Error message",
       "modelInfo": "Model Information",
       "modelName": "Name",
@@ -675,7 +651,7 @@
       "submit": "Submit Report",
       "success": {
         "title": "Report Submitted",
-        "message": "Thank you for helping us improve PocketPal. Your report will help us fix this issue."
+        "message": "Thank you for helping us improve Alesis. Your report will help us fix this issue."
       },
       "error": {
         "title": "Report Failed",
@@ -1132,7 +1108,7 @@
   },
   "camera": {
     "permissionTitle": "Camera Permission Required",
-    "permissionMessage": "PocketPal needs camera access to analyze images",
+    "permissionMessage": "Alesis needs camera access to analyze images",
     "requestingPermission": "Requesting camera permission...",
     "noDevice": "No camera device found",
     "errorTitle": "Camera Error",
@@ -1146,7 +1122,7 @@
   },
   "video": {
     "permissionTitle": "Camera Permission Required",
-    "permissionMessage": "PocketPal needs camera access for video analysis",
+    "permissionMessage": "Alesis needs camera access for video analysis",
     "requestingPermission": "Requesting camera permission...",
     "noDevice": "No camera device found",
     "errorTitle": "Camera Error",
@@ -1492,14 +1468,14 @@
     "skip": "Skip",
     "skipForNow": "Skip for now",
     "splash": {
-      "brand": "PocketPal"
+      "brand": "Alesis"
     },
     "screen1": {
       "title": "Meet your pals.",
       "titleAccent": "pals.",
       "body": "Smart little friends that live inside your phone.\nLet’s get you set up - it’ll take a minute.",
       "cta": "Show me Around",
-      "eyebrow": "Welcome to PocketPal"
+      "eyebrow": "Welcome to Alesis"
     },
     "screen2": {
       "title": "Anytime,\nAnywhere.",

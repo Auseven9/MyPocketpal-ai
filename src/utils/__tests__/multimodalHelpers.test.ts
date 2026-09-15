@@ -4,6 +4,7 @@ import {
   isProjectionModel,
   getRecommendedProjectionModel,
   getLLMFiles,
+  computeLocalVisionPairings,
 } from '../multimodalHelpers';
 import {ModelFile} from '../types';
 
@@ -289,6 +290,49 @@ describe('multimodalHelpers', () => {
         ],
       );
       expect(result).toBe('mmproj-llama-3.1-vision-q4_k.gguf');
+    });
+  });
+
+  describe('computeLocalVisionPairings', () => {
+    it('leaves a local LLM non-multimodal when no local projector is imported', () => {
+      const result = computeLocalVisionPairings([
+        {id: 'llm-1', filename: 'llava-v1.6-mistral-7b.Q4_K_M.gguf'},
+      ]);
+      expect(result.get('llm-1')).toEqual({supportsMultimodal: false});
+    });
+
+    it('pairs a local LLM with a local mmproj file by filename convention', () => {
+      const result = computeLocalVisionPairings([
+        {id: 'llm-1', filename: 'llava-v1.6-mistral-7b.Q4_K_M.gguf'},
+        {id: 'proj-1', filename: 'mmproj-llava-v1.6-mistral-7b-f16.gguf'},
+      ]);
+      expect(result.get('llm-1')).toEqual({
+        supportsMultimodal: true,
+        compatibleProjectionModels: ['proj-1'],
+        defaultProjectionModel: 'proj-1',
+      });
+      // The projector itself gets no entry — it isn't a chat model.
+      expect(result.has('proj-1')).toBe(false);
+    });
+
+    it('offers every local projector as a candidate and recommends by quant match', () => {
+      const result = computeLocalVisionPairings([
+        {id: 'llm-1', filename: 'llava-v1.6-mistral-7b-q4_0.gguf'},
+        {id: 'proj-lo', filename: 'mmproj-llava-v1.6-mistral-7b-q4_0.gguf'},
+        {id: 'proj-hi', filename: 'mmproj-llava-v1.6-mistral-7b-q8_0.gguf'},
+      ]);
+      expect(result.get('llm-1')).toEqual({
+        supportsMultimodal: true,
+        compatibleProjectionModels: ['proj-lo', 'proj-hi'],
+        defaultProjectionModel: 'proj-lo', // exact quant match wins
+      });
+    });
+
+    it('does not treat a projector file as a pairable chat model', () => {
+      const result = computeLocalVisionPairings([
+        {id: 'proj-1', filename: 'mmproj-llava-v1.6-mistral-7b-f16.gguf'},
+      ]);
+      expect(result.size).toBe(0);
     });
   });
 });

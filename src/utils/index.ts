@@ -861,3 +861,4 @@ export * from './hf';
 export * from './hfResolve';
 export * from './hfUserAgent';
 export * from './safeAlert';
+export * from './confirmDestructiveAction';

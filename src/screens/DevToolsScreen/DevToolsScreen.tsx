@@ -10,6 +10,7 @@ import {useTheme} from '../../hooks';
 import {createStyles} from './styles';
 import {chatSessionRepository} from '../../repositories/ChatSessionRepository';
 import {TestCompletionScreen, DatabaseInspectorScreen} from './screens';
+import {confirmDestructiveAction} from '../../utils';
 
 // Define the stack navigator param list
 type DevToolsStackParamList = {
@@ -144,21 +145,14 @@ const DevToolsHomeScreen: React.FC = () => {
               <Button
                 mode="contained"
                 onPress={() => {
-                  Alert.alert(
-                    'Reset Database Migration',
-                    'This will delete all data in the database. Are you sure you want to continue?',
-                    [
-                      {
-                        text: 'Cancel',
-                        style: 'cancel',
-                      },
-                      {
-                        text: 'Reset',
-                        style: 'destructive',
-                        onPress: resetMigration,
-                      },
-                    ],
-                  );
+                  confirmDestructiveAction({
+                    title: 'Reset Database Migration',
+                    message:
+                      'This will delete all data in the database. Are you sure you want to continue?',
+                    cancelLabel: 'Cancel',
+                    confirmLabel: 'Reset',
+                    onConfirm: resetMigration,
+                  });
                 }}
                 style={styles.button}>
                 Reset Migration

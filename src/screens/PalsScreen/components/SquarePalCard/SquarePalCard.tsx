@@ -24,7 +24,7 @@ import {chatSessionStore, modelStore} from '../../../../store';
 
 import type {PalsHubPal} from '../../../../types/palshub';
 
-import {L10nContext} from '../../../../utils';
+import {L10nContext, confirmDestructiveAction} from '../../../../utils';
 import {t} from '../../../../locales';
 import {exportPal} from '../../../../utils/exportUtils';
 import {ROUTES} from '../../../../utils/navigationConstants';
@@ -338,18 +338,13 @@ export const SquarePalCard: React.FC<SquarePalCardProps> = observer(
     // Action handlers for local pals only
     const handleDelete = () => {
       const palName = isPalsHubPal(pal) ? pal.title : pal.name;
-      Alert.alert(
-        l10n.palsScreen.deletePal,
-        t(l10n.palsScreen.deletePalConfirmation, {palName}),
-        [
-          {text: l10n.common.cancel, style: 'cancel'},
-          {
-            text: l10n.common.delete,
-            style: 'destructive',
-            onPress: () => palStore.deletePal(pal.id),
-          },
-        ],
-      );
+      confirmDestructiveAction({
+        title: l10n.palsScreen.deletePal,
+        message: t(l10n.palsScreen.deletePalConfirmation, {palName}),
+        cancelLabel: l10n.common.cancel,
+        confirmLabel: l10n.common.delete,
+        onConfirm: () => palStore.deletePal(pal.id),
+      });
     };
 
     const handleShare = async () => {

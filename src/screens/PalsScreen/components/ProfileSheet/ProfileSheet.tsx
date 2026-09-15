@@ -7,7 +7,7 @@ import {useSafeAreaInsets} from 'react-native-safe-area-context';
 import {UserIcon, LockIcon} from '../../../../assets/icons';
 
 import {useTheme} from '../../../../hooks';
-import {L10nContext} from '../../../../utils';
+import {L10nContext, confirmDestructiveAction} from '../../../../utils';
 import {Sheet} from '../../../../components';
 import {createStyles} from './styles';
 
@@ -27,29 +27,24 @@ export const ProfileSheet: React.FC<ProfileSheetProps> = observer(
     const l10n = useContext(L10nContext);
 
     const handleSignOut = () => {
-      Alert.alert(
-        l10n.palsScreen.signOut,
-        l10n.palsScreen.signOutConfirmation,
-        [
-          {text: l10n.common.cancel, style: 'cancel'},
-          {
-            text: l10n.palsScreen.signOut,
-            style: 'destructive',
-            onPress: async () => {
-              try {
-                await authService.signOut();
-                onClose();
-              } catch (error) {
-                console.error('Error signing out:', error);
-                Alert.alert(
-                  l10n.errors.unexpectedError,
-                  l10n.palsScreen.signOutError,
-                );
-              }
-            },
-          },
-        ],
-      );
+      confirmDestructiveAction({
+        title: l10n.palsScreen.signOut,
+        message: l10n.palsScreen.signOutConfirmation,
+        cancelLabel: l10n.common.cancel,
+        confirmLabel: l10n.palsScreen.signOut,
+        onConfirm: async () => {
+          try {
+            await authService.signOut();
+            onClose();
+          } catch (error) {
+            console.error('Error signing out:', error);
+            Alert.alert(
+              l10n.errors.unexpectedError,
+              l10n.palsScreen.signOutError,
+            );
+          }
+        },
+      });
     };
 
     const renderAuthenticatedContent = () => {

@@ -22,7 +22,7 @@ import {
   TrashIcon,
   AppInfoIcon,
 } from '../../assets/icons';
-import {L10nContext} from '../../utils';
+import {L10nContext, confirmDestructiveAction} from '../../utils';
 import {t} from '../../locales';
 import {ROUTES} from '../../utils/navigationConstants';
 import {exportChatSession} from '../../utils/exportUtils';
@@ -366,25 +366,17 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
     const onPressDelete = React.useCallback(
       (sessionId: string) => {
         if (sessionId) {
-          Alert.alert(
-            l10n.components.sidebarContent.deleteChatTitle,
-            l10n.components.sidebarContent.deleteChatMessage,
-            [
-              {
-                text: l10n.common.cancel,
-                style: 'cancel',
-              },
-              {
-                text: l10n.common.delete,
-                style: 'destructive',
-                onPress: async () => {
-                  chatSessionStore.resetActiveSession();
-                  await chatSessionStore.deleteSession(sessionId);
-                  closeMenu();
-                },
-              },
-            ],
-          );
+          confirmDestructiveAction({
+            title: l10n.components.sidebarContent.deleteChatTitle,
+            message: l10n.components.sidebarContent.deleteChatMessage,
+            cancelLabel: l10n.common.cancel,
+            confirmLabel: l10n.common.delete,
+            onConfirm: async () => {
+              chatSessionStore.resetActiveSession();
+              await chatSessionStore.deleteSession(sessionId);
+              closeMenu();
+            },
+          });
         }
       },
       [l10n, closeMenu],
@@ -427,32 +419,24 @@ export const SidebarContent: React.FC<DrawerContentComponentProps> = observer(
     const handleBulkDelete = React.useCallback(() => {
       const count = chatSessionStore.selectedCount;
 
-      Alert.alert(
-        l10n.components.sidebarContent.bulkDeleteTitle,
-        t(l10n.components.sidebarContent.bulkDeleteMessage, {
+      confirmDestructiveAction({
+        title: l10n.components.sidebarContent.bulkDeleteTitle,
+        message: t(l10n.components.sidebarContent.bulkDeleteMessage, {
           count: count.toString(),
         }),
-        [
-          {
-            text: l10n.common.cancel,
-            style: 'cancel',
-          },
-          {
-            text: l10n.common.delete,
-            style: 'destructive',
-            onPress: async () => {
-              try {
-                await chatSessionStore.bulkDeleteSessions();
-              } catch {
-                Alert.alert(
-                  l10n.common.error,
-                  l10n.components.sidebarContent.bulkDeleteError,
-                );
-              }
-            },
-          },
-        ],
-      );
+        cancelLabel: l10n.common.cancel,
+        confirmLabel: l10n.common.delete,
+        onConfirm: async () => {
+          try {
+            await chatSessionStore.bulkDeleteSessions();
+          } catch {
+            Alert.alert(
+              l10n.common.error,
+              l10n.components.sidebarContent.bulkDeleteError,
+            );
+          }
+        },
+      });
     }, [l10n]);
 
     const handleBulkExport = React.useCallback(async () => {

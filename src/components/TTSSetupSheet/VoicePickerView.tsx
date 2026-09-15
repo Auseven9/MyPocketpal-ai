@@ -1,6 +1,5 @@
 import React, {useContext, useEffect, useMemo, useState} from 'react';
 import {
-  Alert,
   LayoutAnimation,
   Platform,
   StyleSheet,
@@ -40,7 +39,7 @@ import {
 } from '../../services/tts';
 import type {EngineId, Voice} from '../../services/tts';
 import {ttsStore} from '../../store';
-import {L10nContext} from '../../utils';
+import {L10nContext, confirmDestructiveAction} from '../../utils';
 
 import {AutoSpeakRow} from './AutoSpeakRow';
 import {createStyles} from './styles';
@@ -277,26 +276,21 @@ export const VoicePickerView: React.FC = observer(() => {
   };
 
   const handleDelete = (engineId: NeuralEngineId) => {
-    Alert.alert(
-      t(l10n.voiceAndSpeech.engineRemoveTitle, {
+    confirmDestructiveAction({
+      title: t(l10n.voiceAndSpeech.engineRemoveTitle, {
         engineTitle: engineTitle(engineId, l10n),
       }),
-      t(l10n.voiceAndSpeech.engineRemoveBody, {
+      message: t(l10n.voiceAndSpeech.engineRemoveBody, {
         sizeMb: ENGINE_META[engineId].sizeMb,
       }),
-      [
-        {text: l10n.voiceAndSpeech.engineRemoveCancel, style: 'cancel'},
-        {
-          text: l10n.voiceAndSpeech.engineRemoveConfirm,
-          style: 'destructive',
-          onPress: () => {
-            triggerDelete(engineId).catch(err => {
-              console.warn(`[VoicePickerView] delete ${engineId} failed:`, err);
-            });
-          },
-        },
-      ],
-    );
+      cancelLabel: l10n.voiceAndSpeech.engineRemoveCancel,
+      confirmLabel: l10n.voiceAndSpeech.engineRemoveConfirm,
+      onConfirm: () => {
+        triggerDelete(engineId).catch(err => {
+          console.warn(`[VoicePickerView] delete ${engineId} failed:`, err);
+        });
+      },
+    });
   };
 
   const renderVoiceRow = (voice: Voice) => {

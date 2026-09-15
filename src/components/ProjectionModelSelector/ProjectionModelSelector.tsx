@@ -12,7 +12,7 @@ import {createStyles} from './styles';
 import {modelStore} from '../../store';
 
 import {Model} from '../../utils/types';
-import {L10nContext, formatBytes} from '../../utils';
+import {L10nContext, formatBytes, confirmDestructiveAction} from '../../utils';
 
 interface ProjectionModelSelectorProps {
   model: Model;
@@ -131,32 +131,29 @@ export const ProjectionModelSelector = observer(
       }
 
       // Show confirmation dialog (always allow deletion for manual action)
-      Alert.alert(l10n.models.multimodal.deleteProjectionTitle, message, [
-        {text: l10n.common.cancel, style: 'cancel'},
-        {
-          text: l10n.common.delete,
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              // Disable vision for dependent models before deletion
-              dependentModels.forEach(dependentModel => {
-                modelStore.setModelVisionEnabled(dependentModel.id, false);
-              });
+      confirmDestructiveAction({
+        title: l10n.models.multimodal.deleteProjectionTitle,
+        message,
+        cancelLabel: l10n.common.cancel,
+        confirmLabel: l10n.common.delete,
+        onConfirm: async () => {
+          try {
+            // Disable vision for dependent models before deletion
+            dependentModels.forEach(dependentModel => {
+              modelStore.setModelVisionEnabled(dependentModel.id, false);
+            });
 
-              await modelStore.deleteModel(projectionModel);
-            } catch (error) {
-              console.error('Failed to delete projection model:', error);
-              Alert.alert(
-                l10n.models.multimodal.cannotDeleteTitle,
-                error instanceof Error
-                  ? error.message
-                  : 'Unknown error occurred',
-                [{text: l10n.common.ok, style: 'default'}],
-              );
-            }
-          },
+            await modelStore.deleteModel(projectionModel);
+          } catch (error) {
+            console.error('Failed to delete projection model:', error);
+            Alert.alert(
+              l10n.models.multimodal.cannotDeleteTitle,
+              error instanceof Error ? error.message : 'Unknown error occurred',
+              [{text: l10n.common.ok, style: 'default'}],
+            );
+          }
         },
-      ]);
+      });
     };
 
     const toggleExpanded = () => {

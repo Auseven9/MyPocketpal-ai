@@ -572,7 +572,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = ai.pocketpal;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.alesis;
 				PRODUCT_NAME = PocketPal;
 				PROVISIONING_PROFILE_SPECIFIER = "match Development ai.pocketpal";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match Development ai.pocketpal";
@@ -610,7 +610,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = ai.pocketpal;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.alesis;
 				PRODUCT_NAME = PocketPal;
 				PROVISIONING_PROFILE_SPECIFIER = "match AppStore ai.pocketpal";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore ai.pocketpal";
@@ -988,7 +988,7 @@
 					"-ObjC",
 					"-lc++",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = ai.pocketpal;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.alesis;
 				PRODUCT_NAME = PocketPal;
 				PROVISIONING_PROFILE_SPECIFIER = "match Development ai.pocketpal";
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore ai.pocketpal";
