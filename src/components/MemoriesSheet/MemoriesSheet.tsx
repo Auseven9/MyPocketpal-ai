@@ -1,12 +1,12 @@
 import React, {useContext} from 'react';
-import {Alert, TouchableOpacity, View} from 'react-native';
+import {TouchableOpacity, View} from 'react-native';
 import {Button, Text} from 'react-native-paper';
 import {observer} from 'mobx-react';
 
 import {Sheet} from '../Sheet';
 import {useTheme} from '../../hooks';
 import {memoryStore} from '../../store';
-import {L10nContext} from '../../utils';
+import {L10nContext, confirmDestructiveAction} from '../../utils';
 import {timeAgo} from '../../utils/formatters';
 import {TrashIcon} from '../../assets/icons';
 
@@ -32,25 +32,23 @@ export const MemoriesSheet: React.FC<MemoriesSheetProps> = observer(
     const facts = memoryStore.facts;
 
     const handleDeleteFact = (id: string, text: string) => {
-      Alert.alert(strings.deleteFactTitle, text, [
-        {text: l10n.common.cancel, style: 'cancel'},
-        {
-          text: l10n.common.delete,
-          style: 'destructive',
-          onPress: () => memoryStore.forgetFact(id),
-        },
-      ]);
+      confirmDestructiveAction({
+        title: strings.deleteFactTitle,
+        message: text,
+        cancelLabel: l10n.common.cancel,
+        confirmLabel: l10n.common.delete,
+        onConfirm: () => memoryStore.forgetFact(id),
+      });
     };
 
     const handleClearAll = () => {
-      Alert.alert(strings.clearAllTitle, strings.clearAllMessage, [
-        {text: l10n.common.cancel, style: 'cancel'},
-        {
-          text: l10n.common.delete,
-          style: 'destructive',
-          onPress: () => memoryStore.clearAllFacts(),
-        },
-      ]);
+      confirmDestructiveAction({
+        title: strings.clearAllTitle,
+        message: strings.clearAllMessage,
+        cancelLabel: l10n.common.cancel,
+        confirmLabel: l10n.common.delete,
+        onConfirm: () => memoryStore.clearAllFacts(),
+      });
     };
 
     return (

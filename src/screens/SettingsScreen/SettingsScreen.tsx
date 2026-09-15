@@ -67,6 +67,7 @@ import {
   formatBytes,
   clearAllSessionCaches,
   getSessionCacheInfo,
+  confirmDestructiveAction,
 } from '../../utils';
 import {t} from '../../locales';
 import {checkGpuSupport} from '../../utils/deviceCapabilities';
@@ -1450,43 +1451,32 @@ export const SettingsScreen: React.FC = observer(() => {
                             },
                           );
 
-                          Alert.alert(
-                            l10n.settings.clearCachesConfirmTitle,
-                            confirmMessage,
-                            [
-                              {
-                                text: l10n.common.cancel,
-                                style: 'cancel',
-                              },
-                              {
-                                text: l10n.settings.clearCachesButton,
-                                style: 'destructive',
-                                onPress: async () => {
-                                  try {
-                                    const deletedCount =
-                                      await clearAllSessionCaches();
-                                    const successMessage = t(
-                                      l10n.settings.clearCachesSuccess,
-                                      {count: deletedCount.toString()},
-                                    );
-                                    Alert.alert(
-                                      l10n.settings.clearPalCaches,
-                                      successMessage,
-                                    );
-                                  } catch (error) {
-                                    console.error(
-                                      'Failed to clear caches:',
-                                      error,
-                                    );
-                                    Alert.alert(
-                                      l10n.settings.clearPalCaches,
-                                      l10n.settings.clearCachesError,
-                                    );
-                                  }
-                                },
-                              },
-                            ],
-                          );
+                          confirmDestructiveAction({
+                            title: l10n.settings.clearCachesConfirmTitle,
+                            message: confirmMessage,
+                            cancelLabel: l10n.common.cancel,
+                            confirmLabel: l10n.settings.clearCachesButton,
+                            onConfirm: async () => {
+                              try {
+                                const deletedCount =
+                                  await clearAllSessionCaches();
+                                const successMessage = t(
+                                  l10n.settings.clearCachesSuccess,
+                                  {count: deletedCount.toString()},
+                                );
+                                Alert.alert(
+                                  l10n.settings.clearPalCaches,
+                                  successMessage,
+                                );
+                              } catch (error) {
+                                console.error('Failed to clear caches:', error);
+                                Alert.alert(
+                                  l10n.settings.clearPalCaches,
+                                  l10n.settings.clearCachesError,
+                                );
+                              }
+                            },
+                          });
                         } catch (error) {
                           console.error('Failed to get cache info:', error);
                           Alert.alert(

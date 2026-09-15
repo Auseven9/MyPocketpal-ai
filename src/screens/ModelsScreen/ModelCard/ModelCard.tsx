@@ -46,6 +46,7 @@ import {
   formatNumber,
   isMTPCapable,
   isDraftOnlyModel,
+  confirmDestructiveAction,
 } from '../../../utils';
 
 import {
@@ -178,31 +179,26 @@ export const ModelCard: React.FC<ModelCardProps> = observer(
           }
 
           // Show projection-specific confirmation dialog
-          Alert.alert(
-            l10n.models.multimodal.deleteProjectionTitle,
-            l10n.models.multimodal.deleteProjectionMessage,
-            [
-              {text: l10n.common.cancel, style: 'cancel'},
-              {
-                text: l10n.common.delete,
-                style: 'destructive',
-                onPress: async () => {
-                  try {
-                    await modelStore.deleteModel(model);
-                  } catch (error) {
-                    console.error('Failed to delete projection model:', error);
-                    Alert.alert(
-                      l10n.models.multimodal.cannotDeleteTitle,
-                      error instanceof Error
-                        ? error.message
-                        : 'Unknown error occurred',
-                      [{text: l10n.common.ok, style: 'default'}],
-                    );
-                  }
-                },
-              },
-            ],
-          );
+          confirmDestructiveAction({
+            title: l10n.models.multimodal.deleteProjectionTitle,
+            message: l10n.models.multimodal.deleteProjectionMessage,
+            cancelLabel: l10n.common.cancel,
+            confirmLabel: l10n.common.delete,
+            onConfirm: async () => {
+              try {
+                await modelStore.deleteModel(model);
+              } catch (error) {
+                console.error('Failed to delete projection model:', error);
+                Alert.alert(
+                  l10n.models.multimodal.cannotDeleteTitle,
+                  error instanceof Error
+                    ? error.message
+                    : 'Unknown error occurred',
+                  [{text: l10n.common.ok, style: 'default'}],
+                );
+              }
+            },
+          });
         } else {
           // Standard model deletion
           Alert.alert(
@@ -232,18 +228,13 @@ export const ModelCard: React.FC<ModelCardProps> = observer(
     }, [model.hfUrl]);
 
     const handleRemove = useCallback(() => {
-      Alert.alert(
-        l10n.models.modelCard.alerts.removeTitle,
-        l10n.models.modelCard.alerts.removeMessage,
-        [
-          {text: l10n.common.cancel, style: 'cancel'},
-          {
-            text: l10n.models.modelCard.buttons.remove,
-            style: 'destructive',
-            onPress: () => modelStore.removeModelFromList(model),
-          },
-        ],
-      );
+      confirmDestructiveAction({
+        title: l10n.models.modelCard.alerts.removeTitle,
+        message: l10n.models.modelCard.alerts.removeMessage,
+        cancelLabel: l10n.common.cancel,
+        confirmLabel: l10n.models.modelCard.buttons.remove,
+        onConfirm: () => modelStore.removeModelFromList(model),
+      });
     }, [model, l10n]);
 
     const handleWarningPress = () => {

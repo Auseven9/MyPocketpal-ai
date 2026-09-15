@@ -21,7 +21,7 @@ import {styles} from './styles';
 
 import {chatSessionStore, modelStore, uiStore} from '../../store';
 
-import {L10nContext} from '../../utils';
+import {L10nContext, confirmDestructiveAction} from '../../utils';
 import {Model} from '../../utils/types';
 import {t} from '../../locales';
 import {importChatSessions} from '../../utils/importUtils';
@@ -68,25 +68,17 @@ export const HeaderRight: React.FC = observer(() => {
 
   const onPressDelete = () => {
     if (session?.id) {
-      Alert.alert(
-        l10n.components.headerRight.deleteChatTitle,
-        l10n.components.headerRight.deleteChatMessage,
-        [
-          {
-            text: l10n.common.cancel,
-            style: 'cancel',
-          },
-          {
-            text: l10n.common.delete,
-            style: 'destructive',
-            onPress: async () => {
-              chatSessionStore.resetActiveSession();
-              await chatSessionStore.deleteSession(session.id);
-              closeMenu();
-            },
-          },
-        ],
-      );
+      confirmDestructiveAction({
+        title: l10n.components.headerRight.deleteChatTitle,
+        message: l10n.components.headerRight.deleteChatMessage,
+        cancelLabel: l10n.common.cancel,
+        confirmLabel: l10n.common.delete,
+        onConfirm: async () => {
+          chatSessionStore.resetActiveSession();
+          await chatSessionStore.deleteSession(session.id);
+          closeMenu();
+        },
+      });
     }
     closeMenu();
   };
