@@ -42,6 +42,7 @@ import {
   HFTokenSheet,
   LanguageSelector,
   SearchProviderKeySheet,
+  MemoriesSheet,
   InputSlider,
 } from '../../components';
 
@@ -56,6 +57,7 @@ import {
   hfStore,
   ttsStore,
   searchProviderStore,
+  memoryStore,
 } from '../../store';
 import type {SearchProviderId} from '../../services/search/types';
 
@@ -103,6 +105,7 @@ export const SettingsScreen: React.FC = observer(() => {
     y: number;
   }>({x: 0, y: 0});
   const [showSearchKeySheet, setShowSearchKeySheet] = useState(false);
+  const [showMemoriesSheet, setShowMemoriesSheet] = useState(false);
   const searchProviderButtonRef = useRef<View>(null);
   const [gpuSupported, setGpuSupported] = useState(false);
   const [draftModelAnchor, setDraftModelAnchor] = useState<{
@@ -1327,6 +1330,36 @@ export const SettingsScreen: React.FC = observer(() => {
             </Card.Content>
           </Card>
 
+          {/* Memories */}
+          <Card elevation={0} style={styles.card}>
+            <Card.Title title={l10n.settings.memories.title} />
+            <Card.Content>
+              <View style={styles.settingItemContainer}>
+                <View style={styles.switchContainer}>
+                  <View style={styles.textContainer}>
+                    <Text variant="titleMedium" style={styles.textLabel}>
+                      {memoryStore.facts.length > 0
+                        ? t(l10n.settings.memories.countLabel, {
+                            count: memoryStore.facts.length,
+                          })
+                        : l10n.settings.memories.countLabelZero}
+                    </Text>
+                    <Text variant="labelSmall" style={styles.textDescription}>
+                      {l10n.settings.memories.description}
+                    </Text>
+                  </View>
+                  <Button
+                    testID="manage-memories-button"
+                    mode="outlined"
+                    onPress={() => setShowMemoriesSheet(true)}
+                    style={styles.menuButton}>
+                    {l10n.settings.memories.manageButton}
+                  </Button>
+                </View>
+              </View>
+            </Card.Content>
+          </Card>
+
           {/* API Settings */}
           <Card elevation={0} style={styles.card}>
             <Card.Title title={l10n.settings.apiSettingsTitle} />
@@ -1525,6 +1558,10 @@ export const SettingsScreen: React.FC = observer(() => {
         providerId={activeSearchProviderId}
         providerLabel={activeSearchProvider?.label ?? activeSearchProviderId}
         onDismiss={() => setShowSearchKeySheet(false)}
+      />
+      <MemoriesSheet
+        isVisible={showMemoriesSheet}
+        onDismiss={() => setShowMemoriesSheet(false)}
       />
     </SafeAreaView>
   );

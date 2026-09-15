@@ -152,6 +152,20 @@
       "consentGivenDescription": "Queries and page reads may leave your device as described above.",
       "consentRevoke": "Revoke"
     },
+    "memories": {
+      "title": "Memories",
+      "description": "Facts Pals have saved about you with the remember tool. They're read on every chat, no matter which Pal, until you delete them here.",
+      "countLabel": "{{count}} remembered",
+      "countLabelZero": "Nothing remembered yet",
+      "manageButton": "Manage",
+      "sheetDescription": "Delete a fact so Pals stop seeing it, or clear everything at once.",
+      "emptyState": "Nothing remembered yet. A Pal will add facts here when it uses the remember tool.",
+      "deleteFactTitle": "Forget this?",
+      "deleteFactAccessibilityLabel": "Forget this memory",
+      "clearAllButton": "Clear All",
+      "clearAllTitle": "Clear all memories?",
+      "clearAllMessage": "This deletes every fact a Pal has remembered about you. This can't be undone."
+    },
     "apiSettingsTitle": "API Settings",
     "huggingFaceTokenLabel": "Hugging Face Token",
     "tokenIsSetDescription": "Token is set. Required for accessing gated models.",
